@@ -17,6 +17,9 @@ module HttpAcceptLanguage
     #   # => [ 'nl-NL', 'nl-BE', 'nl', 'en-US', 'en' ]
     #
     def user_preferred_languages
+      Rails.logger.info "user_preferred_languages with header: #{header}"
+      Rails.logger.info "@user_preferred_languages: #{@user_preferred_languages}" if @user_preferred_languages
+
       @user_preferred_languages ||= header.split(/\s*,\s*/).collect do |l|
         l += ';q=1.0' unless l =~ /;q=\d+\.\d+$/
           l.split(';q=')
@@ -26,7 +29,8 @@ module HttpAcceptLanguage
       end.collect do |l|
         l.first.downcase.gsub(/-[a-z0-9]+$/i) { |x| x.upcase }
       end
-    rescue # Just rescue anything if the browser messed up badly.
+    rescue => e # Just rescue anything if the browser messed up badly.
+      Rails.logger.info "Exception: #{e.inspect} was catched inside user_preferred_languages"
       []
     end
 
